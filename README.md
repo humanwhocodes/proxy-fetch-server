@@ -8,6 +8,8 @@ If you find this useful, please consider supporting my work with a [donation](ht
 
 A Node.js server that uses a proxy agent to make fetch requests. Built with [Hono](https://hono.dev/), this server accepts POST requests with URLs to fetch through a configurable proxy.
 
+The intended use is as a serverless function.
+
 ## Installation
 
 ```shell
