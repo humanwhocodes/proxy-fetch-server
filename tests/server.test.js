@@ -127,6 +127,42 @@ describe("Proxy Fetch Server", () => {
 			});
 		});
 
+		it("should return 400 when url is not a valid URL", async () => {
+			const req = new Request("http://localhost/", {
+				method: "POST",
+				headers: {
+					"Content-Type": "application/json",
+					Authorization: "Bearer test-secret-key",
+				},
+				body: JSON.stringify({ url: "not-a-valid-url" }),
+			});
+
+			const res = await app.fetch(req);
+			const data = await res.json();
+
+			expect(res.status).toBe(400);
+			expect(data).toEqual({ error: "Invalid URL format" });
+		});
+
+		it("should return 400 when url uses disallowed protocol", async () => {
+			const req = new Request("http://localhost/", {
+				method: "POST",
+				headers: {
+					"Content-Type": "application/json",
+					Authorization: "Bearer test-secret-key",
+				},
+				body: JSON.stringify({ url: "file:///etc/passwd" }),
+			});
+
+			const res = await app.fetch(req);
+			const data = await res.json();
+
+			expect(res.status).toBe(400);
+			expect(data).toEqual({
+				error: "Only HTTP and HTTPS URLs are allowed",
+			});
+		});
+
 		it("should successfully fetch and return the response", async () => {
 			// Mock the route
 			mockServer.get("/", {

@@ -25,6 +25,11 @@ function createApp(config) {
 
 	const { expectedKey, proxyUri, proxyToken } = config;
 
+	// Validate required configuration
+	if (!expectedKey) {
+		throw new Error("expectedKey is required in configuration");
+	}
+
 	/**
 	 * POST / endpoint - Fetches a URL using a proxy agent
 	 */
@@ -62,6 +67,23 @@ function createApp(config) {
 			);
 		}
 
+		// Validate URL format
+		let targetUrl;
+
+		try {
+			targetUrl = new URL(body.url);
+		} catch {
+			return c.json({ error: "Invalid URL format" }, 400);
+		}
+
+		// Restrict to HTTP/HTTPS schemes to prevent SSRF attacks
+		if (targetUrl.protocol !== "http:" && targetUrl.protocol !== "https:") {
+			return c.json(
+				{ error: "Only HTTP and HTTPS URLs are allowed" },
+				400,
+			);
+		}
+
 		// Create proxy agent if proxy URI is configured
 		/** @type {Record<string, any>} */
 		const fetchOptions = {};
@@ -71,16 +93,14 @@ function createApp(config) {
 				getProxyForUrl: () => proxyUri,
 			});
 
-			// Add proxy token as Authorization header if configured
-			/** @type {Record<string, string>} */
-			const headers = {};
-
-			if (proxyToken) {
-				headers["Authorization"] = `Bearer ${proxyToken}`;
-			}
-
 			fetchOptions.dispatcher = agent;
-			fetchOptions.headers = headers;
+
+			// Add proxy token as Authorization header if configured
+			if (proxyToken) {
+				fetchOptions.headers = {
+					Authorization: `Bearer ${proxyToken}`,
+				};
+			}
 		}
 
 		// Fetch the URL
@@ -111,16 +131,24 @@ function createApp(config) {
 	return app;
 }
 
-// Get configuration from environment variables
-const expectedKey = process.env.PROXY_FETCH_KEY || "";
-const port = parseInt(process.env.PROXY_FETCH_PORT || "8080", 10);
-const proxyUri = process.env.PROXY_FETCH_URI || "";
-const proxyToken = process.env.PROXY_FETCH_TOKEN || "";
-
-const app = createApp({ expectedKey, proxyUri, proxyToken });
-
 // Start server only if this file is executed directly
 if (import.meta.url === `file://${process.argv[1]}`) {
+	// Get configuration from environment variables
+	const expectedKey = process.env.PROXY_FETCH_KEY;
+	const port = parseInt(process.env.PROXY_FETCH_PORT || "8080", 10);
+	const proxyUri = process.env.PROXY_FETCH_URI || "";
+	const proxyToken = process.env.PROXY_FETCH_TOKEN || "";
+
+	// Validate required configuration
+	if (!expectedKey) {
+		console.error(
+			"Error: PROXY_FETCH_KEY environment variable is required",
+		);
+		process.exit(1);
+	}
+
+	const app = createApp({ expectedKey, proxyUri, proxyToken });
+
 	console.log(`Starting server on port ${port}...`);
 	serve({
 		fetch: app.fetch,
@@ -128,4 +156,4 @@ if (import.meta.url === `file://${process.argv[1]}`) {
 	});
 }
 
-export { app, createApp };
+export { createApp };
