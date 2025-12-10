@@ -31,7 +31,7 @@ The server is configured using environment variables:
 - **PROXY_FETCH_KEY** (required) - The expected Bearer token in the Authorization header
 - **PROXY_URI** (required) - The address of the proxy to use with the proxy agent
 - **PORT** (optional) - The port to start the server on (default: 8080)
-- **PROXY_FETCH_TOKEN** (optional) - The token that the proxy expects
+- **PROXY_TOKEN** (optional) - The token that the proxy expects
 
 Example:
 
@@ -39,7 +39,7 @@ Example:
 PROXY_FETCH_KEY=my-secret-key \
 PORT=3000 \
 PROXY_URI=http://proxy.example.com:8080 \
-PROXY_FETCH_TOKEN=proxy-secret \
+PROXY_TOKEN=proxy-secret \
 npx @humanwhocodes/proxy-fetch-server
 ```
 

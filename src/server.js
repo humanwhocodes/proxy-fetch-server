@@ -17,7 +17,7 @@ if (import.meta.url === `file://${process.argv[1]}`) {
 	const expectedKey = process.env.PROXY_FETCH_KEY;
 	const port = parseInt(process.env.PORT || "8080", 10);
 	const proxyUri = process.env.PROXY_URI;
-	const proxyToken = process.env.PROXY_FETCH_TOKEN;
+	const proxyToken = process.env.PROXY_TOKEN;
 
 	// Validate required configuration
 	if (!expectedKey) {
