@@ -1,5 +1,5 @@
 {
-  "name": "@humanwhocodes/replace-me",
+  "name": "@humanwhocodes/proxy-fetch-server",
   "version": "0.0.0",
   "exports": "./dist/index.js",
   "publish": {

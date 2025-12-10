@@ -4,3 +4,5 @@
  */
 
 /* @ts-self-types="./index.d.ts" */
+
+export { app } from "./server.js";

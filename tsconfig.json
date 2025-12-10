@@ -1,12 +1,12 @@
 {
-  "files": ["src/index.js"],
+  "files": ["src/index.js", "src/server.js"],
   "compilerOptions": {
     "declaration": true,
     "allowJs": true,
     "checkJs": true,
     "strict": true,
     "target": "ES2022",
-    "lib": ["ESNext"],
+    "lib": ["ESNext", "DOM"],
     "module": "NodeNext",
     "moduleResolution": "NodeNext",
     "outDir": "dist",
