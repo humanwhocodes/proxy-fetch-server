@@ -51,7 +51,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/humanwhocodes/proxy-fetch.git"
+    "url": "git+https://github.com/humanwhocodes/proxy-fetch-server.git"
   },
   "keywords": [
     "proxy",

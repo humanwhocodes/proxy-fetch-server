@@ -6,6 +6,7 @@
 /* @ts-self-types="./app.d.ts" */
 
 import { Hono } from "hono";
+import { bearerAuth } from "hono/bearer-auth";
 import { ProxyAgent } from "undici";
 
 /**
@@ -30,25 +31,13 @@ function createApp(config) {
 		throw new Error("proxyUri is required in configuration");
 	}
 
+	// Apply bearer auth middleware
+	app.use("/", bearerAuth({ token: expectedKey }));
+
 	/**
 	 * POST / endpoint - Fetches a URL using a proxy agent
 	 */
 	app.post("/", async (c) => {
-		// Check Authorization header
-		const authHeader = c.req.header("Authorization");
-
-		if (!authHeader || !authHeader.startsWith("Bearer ")) {
-			return c.json(
-				{ error: "Missing or invalid Authorization header" },
-				401,
-			);
-		}
-
-		const token = authHeader.substring(7); // Remove "Bearer " prefix
-
-		if (token !== expectedKey) {
-			return c.json({ error: "Invalid authorization token" }, 403);
-		}
 
 		// Parse request body
 		/** @type {any} */

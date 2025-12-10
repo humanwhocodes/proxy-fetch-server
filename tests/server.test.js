@@ -47,15 +47,11 @@ describe("Proxy Fetch Server", () => {
 			});
 
 			const res = await app.fetch(req);
-			const data = await res.json();
 
 			expect(res.status).toBe(401);
-			expect(data).toEqual({
-				error: "Missing or invalid Authorization header",
-			});
 		});
 
-		it("should return 401 when Authorization header is not Bearer", async () => {
+		it("should return 400 when Authorization header is not Bearer", async () => {
 			const req = new Request("http://localhost/", {
 				method: "POST",
 				headers: {
@@ -66,15 +62,11 @@ describe("Proxy Fetch Server", () => {
 			});
 
 			const res = await app.fetch(req);
-			const data = await res.json();
 
-			expect(res.status).toBe(401);
-			expect(data).toEqual({
-				error: "Missing or invalid Authorization header",
-			});
+			expect(res.status).toBe(400);
 		});
 
-		it("should return 403 when Bearer token is invalid", async () => {
+		it("should return 401 when Bearer token is invalid", async () => {
 			const req = new Request("http://localhost/", {
 				method: "POST",
 				headers: {
@@ -85,10 +77,8 @@ describe("Proxy Fetch Server", () => {
 			});
 
 			const res = await app.fetch(req);
-			const data = await res.json();
 
-			expect(res.status).toBe(403);
-			expect(data).toEqual({ error: "Invalid authorization token" });
+			expect(res.status).toBe(401);
 		});
 
 		it("should return 400 when request body is not valid JSON", async () => {

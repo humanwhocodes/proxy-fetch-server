@@ -29,16 +29,16 @@ npx @humanwhocodes/proxy-fetch-server
 The server is configured using environment variables:
 
 - **PROXY_FETCH_KEY** (required) - The expected Bearer token in the Authorization header
-- **PROXY_FETCH_URI** (required) - The address of the proxy to use with the proxy agent
-- **PROXY_FETCH_PORT** (optional) - The port to start the server on (default: 8080)
+- **PROXY_URI** (required) - The address of the proxy to use with the proxy agent
+- **PORT** (optional) - The port to start the server on (default: 8080)
 - **PROXY_FETCH_TOKEN** (optional) - The token that the proxy expects
 
 Example:
 
 ```shell
 PROXY_FETCH_KEY=my-secret-key \
-PROXY_FETCH_PORT=3000 \
-PROXY_FETCH_URI=http://proxy.example.com:8080 \
+PORT=3000 \
+PROXY_URI=http://proxy.example.com:8080 \
 PROXY_FETCH_TOKEN=proxy-secret \
 npx @humanwhocodes/proxy-fetch-server
 ```

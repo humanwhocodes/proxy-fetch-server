@@ -15,8 +15,8 @@ import { createApp } from "./app.js";
 if (import.meta.url === `file://${process.argv[1]}`) {
 	// Get configuration from environment variables
 	const expectedKey = process.env.PROXY_FETCH_KEY;
-	const port = parseInt(process.env.PROXY_FETCH_PORT || "8080", 10);
-	const proxyUri = process.env.PROXY_FETCH_URI;
+	const port = parseInt(process.env.PORT || "8080", 10);
+	const proxyUri = process.env.PROXY_URI;
 	const proxyToken = process.env.PROXY_FETCH_TOKEN;
 
 	// Validate required configuration
@@ -29,7 +29,7 @@ if (import.meta.url === `file://${process.argv[1]}`) {
 
 	if (!proxyUri) {
 		console.error(
-			"Error: PROXY_FETCH_URI environment variable is required",
+			"Error: PROXY_URI environment variable is required",
 		);
 		process.exit(1);
 	}
