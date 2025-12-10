@@ -5,4 +5,4 @@
 
 /* @ts-self-types="./index.d.ts" */
 
-export { createApp } from "./server.js";
+export { createApp } from "./app.js";

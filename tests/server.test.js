@@ -5,7 +5,7 @@
 
 import { describe, it, expect, beforeEach, afterEach } from "vitest";
 import { MockServer, FetchMocker } from "mentoss";
-import { createApp } from "../src/server.js";
+import { createApp } from "../src/app.js";
 
 describe("Proxy Fetch Server", () => {
 	let fetchMocker;

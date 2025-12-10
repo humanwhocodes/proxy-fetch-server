@@ -29,8 +29,8 @@ npx @humanwhocodes/proxy-fetch-server
 The server is configured using environment variables:
 
 - **PROXY_FETCH_KEY** (required) - The expected Bearer token in the Authorization header
+- **PROXY_FETCH_URI** (required) - The address of the proxy to use with the proxy agent
 - **PROXY_FETCH_PORT** (optional) - The port to start the server on (default: 8080)
-- **PROXY_FETCH_URI** (optional) - The address of the proxy to use with the proxy agent
 - **PROXY_FETCH_TOKEN** (optional) - The token that the proxy expects
 
 Example:
@@ -61,7 +61,7 @@ curl -X POST http://localhost:8080/ \
 
 The server will:
 1. Validate the Bearer token
-2. Fetch the specified URL (optionally through the configured proxy)
+2. Fetch the specified URL through the configured proxy
 3. Return the response with the same status code and content type
 
 ### Programmatic Usage
