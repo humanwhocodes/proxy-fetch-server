@@ -5,10 +5,10 @@ FROM node:22
 WORKDIR /app
 
 # Copy package files
-COPY package.json package-lock.json* ./
+COPY package.json package-lock.json ./
 
 # Install dependencies (including dev dependencies needed for build)
-RUN npm ci || npm install
+RUN npm ci
 
 # Copy source files and TypeScript configuration
 COPY src/ ./src/
