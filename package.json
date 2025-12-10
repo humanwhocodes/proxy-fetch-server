@@ -1,11 +1,14 @@
 {
-  "name": "@humanwhocodes/replace-me",
+  "name": "@humanwhocodes/proxy-fetch-server",
   "version": "0.0.0",
-  "description": "Replace me",
+  "description": "A Node.js server that uses a proxy agent to make fetch requests",
   "type": "module",
   "main": "dist/index.js",
   "module": "dist/index.js",
   "types": "dist/index.d.ts",
+  "bin": {
+    "proxy-fetch-server": "./dist/server.js"
+  },
   "exports": {
     "import": {
       "types": "./dist/index.d.ts",
@@ -42,32 +45,37 @@
     "lint": "eslint src/ tests/",
     "fmt": "prettier --write .",
     "prepublishOnly": "npm run build",
-    "pretest": "npm run build",
-    "test": "mocha tests/**/*.{js,mjs} --exit --forbid-only",
+    "test": "vitest run",
     "test:jsr": "npx jsr@latest publish --dry-run",
     "test:attw": "attw --pack --profile esm-only"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/humanwhocodes/replace-me.git"
+    "url": "git+https://github.com/humanwhocodes/proxy-fetch-server.git"
   },
   "keywords": [
-
+    "proxy",
+    "fetch",
+    "server",
+    "http"
   ],
   "author": "Nicholas C. Zaks",
   "license": "Apache-2.0",
   "devDependencies": {
     "@arethetypeswrong/cli": "^0.17.4",
     "@eslint/js": "^9.0.0",
-    "@types/mocha": "^10.0.3",
     "@types/node": "^22.9.0",
     "eslint": "^9.0.0",
     "lint-staged": "15.4.3",
-    "mocha": "^11.0.0",
+    "mentoss": "^0.12.0",
     "prettier": "^3.3.3",
     "typescript": "^5.6.3",
+    "vitest": "^2.1.8",
     "yorkie": "2.0.0"
   },
   "dependencies": {
+    "@hono/node-server": "^1.19.7",
+    "hono": "^4.6.14",
+    "undici": "^7.16.0"
   }
 }
