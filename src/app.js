@@ -92,15 +92,16 @@ function createApp(config) {
 		try {
 			const response = await fetch(body.url, fetchOptions);
 
-			// Pass through the response
-			const responseBody = await response.text();
+			// Pass through the response using arrayBuffer for proper binary handling
+			const responseBody = await response.arrayBuffer();
 			const contentType =
-				response.headers.get("Content-Type") || "text/plain";
+				response.headers.get("Content-Type") || "application/octet-stream";
 
 			return new Response(responseBody, {
 				status: response.status,
 				headers: {
 					"Content-Type": contentType,
+					"X-Proxied-By": "proxy-fetch-server",
 				},
 			});
 		} catch (error) {

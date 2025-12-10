@@ -256,5 +256,100 @@ describe("Proxy Fetch Server", () => {
 			);
 			expect(JSON.parse(text)).toEqual({ key: "value" });
 		});
+
+		it("should handle text file responses", async () => {
+			// Mock the route with plain text file
+			const textContent = "This is a plain text file.\nWith multiple lines.";
+			mockServer.get("/file.txt", {
+				status: 200,
+				headers: {
+					"Content-Type": "text/plain",
+				},
+				body: textContent,
+			});
+
+			const req = new Request("http://localhost/", {
+				method: "POST",
+				headers: {
+					"Content-Type": "application/json",
+					Authorization: "Bearer test-secret-key",
+				},
+				body: JSON.stringify({ url: "https://example.com/file.txt" }),
+			});
+
+			const res = await app.fetch(req);
+			const text = await res.text();
+
+			expect(res.status).toBe(200);
+			expect(res.headers.get("Content-Type")).toContain("text/plain");
+			expect(text).toBe(textContent);
+		});
+
+		it("should handle binary image responses", async () => {
+			// Create a small binary image (1x1 transparent PNG)
+			const pngData = new Uint8Array([
+				0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a,
+				0x00, 0x00, 0x00, 0x0d, 0x49, 0x48, 0x44, 0x52,
+				0x00, 0x00, 0x00, 0x01, 0x00, 0x00, 0x00, 0x01,
+				0x08, 0x06, 0x00, 0x00, 0x00, 0x1f, 0x15, 0xc4,
+				0x89, 0x00, 0x00, 0x00, 0x0a, 0x49, 0x44, 0x41,
+				0x54, 0x78, 0x9c, 0x63, 0x00, 0x01, 0x00, 0x00,
+				0x05, 0x00, 0x01, 0x0d, 0x0a, 0x2d, 0xb4, 0x00,
+				0x00, 0x00, 0x00, 0x49, 0x45, 0x4e, 0x44, 0xae,
+				0x42, 0x60, 0x82
+			]);
+
+			mockServer.get("/image.png", {
+				status: 200,
+				headers: {
+					"Content-Type": "image/png",
+				},
+				body: pngData,
+			});
+
+			const req = new Request("http://localhost/", {
+				method: "POST",
+				headers: {
+					"Content-Type": "application/json",
+					Authorization: "Bearer test-secret-key",
+				},
+				body: JSON.stringify({ url: "https://example.com/image.png" }),
+			});
+
+			const res = await app.fetch(req);
+			const arrayBuffer = await res.arrayBuffer();
+			const receivedData = new Uint8Array(arrayBuffer);
+
+			expect(res.status).toBe(200);
+			expect(res.headers.get("Content-Type")).toContain("image/png");
+			expect(receivedData.length).toBe(pngData.length);
+			// Verify the binary data matches
+			expect(Array.from(receivedData)).toEqual(Array.from(pngData));
+		});
+
+		it("should add X-Proxied-By header to responses", async () => {
+			// Mock a simple response
+			mockServer.get("/test", {
+				status: 200,
+				headers: {
+					"Content-Type": "text/plain",
+				},
+				body: "test",
+			});
+
+			const req = new Request("http://localhost/", {
+				method: "POST",
+				headers: {
+					"Content-Type": "application/json",
+					Authorization: "Bearer test-secret-key",
+				},
+				body: JSON.stringify({ url: "https://example.com/test" }),
+			});
+
+			const res = await app.fetch(req);
+
+			expect(res.status).toBe(200);
+			expect(res.headers.get("X-Proxied-By")).toBe("proxy-fetch-server");
+		});
 	});
 });
