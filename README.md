@@ -82,6 +82,28 @@ const app = createApp({
 // Use with your preferred Node.js server adapter
 ```
 
+### Docker Usage
+
+A Dockerfile is provided to run the server in a container:
+
+```shell
+# Build the Docker image
+docker build -t proxy-fetch-server .
+
+# Run the container with required environment variables
+docker run -p 8080:8080 \
+  -e PROXY_FETCH_KEY=my-secret-key \
+  -e PROXY_URI=http://proxy.example.com:8080 \
+  -e PROXY_TOKEN=proxy-secret \
+  proxy-fetch-server
+```
+
+The Dockerfile:
+- Uses Node.js 22 as the base image
+- Builds the TypeScript project
+- Exposes port 8080 (configurable via PORT environment variable)
+- Runs the server using `npx @humanwhocodes/proxy-fetch-server`
+
 ## License
 
 Copyright 2025 Nicholas C. Zakas
