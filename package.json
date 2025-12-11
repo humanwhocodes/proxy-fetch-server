@@ -46,7 +46,6 @@
     "fmt": "prettier --write .",
     "prepublishOnly": "npm run build",
     "test": "vitest run",
-    "test:jsr": "npx jsr@latest publish --dry-run",
     "test:attw": "attw --pack --profile esm-only"
   },
   "repository": {
