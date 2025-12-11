@@ -12,7 +12,7 @@ import { ProxyAgent } from "undici";
 /**
  * Creates the Hono app with the given configuration
  * @param {object} config - Configuration options
- * @param {string} config.expectedKey - Expected Bearer token
+ * @param {string} [config.key] - Expected Bearer token (optional)
  * @param {string} config.proxyUri - Proxy URI (required)
  * @param {string} [config.proxyToken] - Proxy token
  * @returns {Hono} The configured Hono app
@@ -20,19 +20,17 @@ import { ProxyAgent } from "undici";
 function createApp(config) {
 	const app = new Hono();
 
-	const { expectedKey, proxyUri, proxyToken } = config;
+	const { key, proxyUri, proxyToken } = config;
 
 	// Validate required configuration
-	if (!expectedKey) {
-		throw new Error("expectedKey is required in configuration");
-	}
-
 	if (!proxyUri) {
 		throw new Error("proxyUri is required in configuration");
 	}
 
-	// Apply bearer auth middleware
-	app.use("/", bearerAuth({ token: expectedKey }));
+	// Apply bearer auth middleware if key is provided
+	if (key) {
+		app.use("/", bearerAuth({ token: key }));
+	}
 
 	/**
 	 * POST / endpoint - Fetches a URL using a proxy agent
