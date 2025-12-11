@@ -26,7 +26,7 @@ describe("Proxy Fetch Server", () => {
 
 		// Create the app with test configuration
 		app = createApp({
-			expectedKey: "test-secret-key",
+			key: "test-secret-key",
 			proxyUri: "http://proxy.example.com:8080",
 			proxyToken: "proxy-token",
 		});
@@ -350,6 +350,71 @@ describe("Proxy Fetch Server", () => {
 
 			expect(res.status).toBe(200);
 			expect(res.headers.get("X-Proxied-By")).toBe("proxy-fetch-server");
+		});
+	});
+
+	describe("POST / (without authentication key)", () => {
+		let appNoAuth;
+
+		beforeEach(() => {
+			// Create the app without a key
+			appNoAuth = createApp({
+				proxyUri: "http://proxy.example.com:8080",
+				proxyToken: "proxy-token",
+			});
+		});
+
+		it("should allow requests without Authorization header when key is not configured", async () => {
+			// Mock the route
+			mockServer.get("/", {
+				status: 200,
+				headers: {
+					"Content-Type": "text/html",
+				},
+				body: "<html>Test content</html>",
+			});
+
+			const req = new Request("http://localhost/", {
+				method: "POST",
+				headers: {
+					"Content-Type": "application/json",
+				},
+				body: JSON.stringify({ url: "https://example.com/" }),
+			});
+
+			const res = await appNoAuth.fetch(req);
+			const text = await res.text();
+
+			expect(res.status).toBe(200);
+			expect(res.headers.get("Content-Type")).toContain("text/html");
+			expect(text).toBe("<html>Test content</html>");
+		});
+
+		it("should ignore Authorization header when key is not configured", async () => {
+			// Mock the route
+			mockServer.get("/", {
+				status: 200,
+				headers: {
+					"Content-Type": "text/html",
+				},
+				body: "<html>Test content</html>",
+			});
+
+			const req = new Request("http://localhost/", {
+				method: "POST",
+				headers: {
+					"Content-Type": "application/json",
+					Authorization: "Bearer any-token",
+				},
+				body: JSON.stringify({ url: "https://example.com/" }),
+			});
+
+			const res = await appNoAuth.fetch(req);
+			const text = await res.text();
+
+			expect(res.status).toBe(200);
+			expect(res.headers.get("Content-Type")).toContain("text/html");
+			expect(text).toBe("<html>Test content</html>");
 		});
 	});
 });
