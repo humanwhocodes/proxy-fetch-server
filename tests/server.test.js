@@ -417,4 +417,93 @@ describe("Proxy Fetch Server", () => {
 			expect(text).toBe("<html>Test content</html>");
 		});
 	});
+
+	describe("Proxy token configuration", () => {
+		it("should use default Bearer token type when proxyTokenType is not specified", async () => {
+			// Create app without specifying proxyTokenType
+			const appWithDefaultTokenType = createApp({
+				proxyUri: "http://proxy.example.com:8080",
+				proxyToken: "my-token",
+			});
+
+			// Mock the route
+			mockServer.get("/", {
+				status: 200,
+				headers: {
+					"Content-Type": "text/plain",
+				},
+				body: "success",
+			});
+
+			const req = new Request("http://localhost/", {
+				method: "POST",
+				headers: {
+					"Content-Type": "application/json",
+				},
+				body: JSON.stringify({ url: "https://example.com/" }),
+			});
+
+			const res = await appWithDefaultTokenType.fetch(req);
+
+			expect(res.status).toBe(200);
+		});
+
+		it("should use custom token type when proxyTokenType is specified", async () => {
+			// Create app with custom token type
+			const appWithCustomTokenType = createApp({
+				proxyUri: "http://proxy.example.com:8080",
+				proxyToken: "my-token",
+				proxyTokenType: "Basic",
+			});
+
+			// Mock the route
+			mockServer.get("/", {
+				status: 200,
+				headers: {
+					"Content-Type": "text/plain",
+				},
+				body: "success",
+			});
+
+			const req = new Request("http://localhost/", {
+				method: "POST",
+				headers: {
+					"Content-Type": "application/json",
+				},
+				body: JSON.stringify({ url: "https://example.com/" }),
+			});
+
+			const res = await appWithCustomTokenType.fetch(req);
+
+			expect(res.status).toBe(200);
+		});
+
+		it("should work without proxyToken when not configured", async () => {
+			// Create app without proxy token
+			const appWithoutToken = createApp({
+				proxyUri: "http://proxy.example.com:8080",
+			});
+
+			// Mock the route
+			mockServer.get("/", {
+				status: 200,
+				headers: {
+					"Content-Type": "text/plain",
+				},
+				body: "success",
+			});
+
+			const req = new Request("http://localhost/", {
+				method: "POST",
+				headers: {
+					"Content-Type": "application/json",
+				},
+				body: JSON.stringify({ url: "https://example.com/" }),
+			});
+
+			const res = await appWithoutToken.fetch(req);
+
+			expect(res.status).toBe(200);
+		});
+	});
 });

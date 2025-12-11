@@ -15,12 +15,13 @@ import { ProxyAgent } from "undici";
  * @param {string} [config.key] - Expected Bearer token (optional)
  * @param {string} config.proxyUri - Proxy URI (required)
  * @param {string} [config.proxyToken] - Proxy token
+ * @param {string} [config.proxyTokenType] - Proxy token type prefix (default: "Bearer")
  * @returns {Hono} The configured Hono app
  */
 function createApp(config) {
 	const app = new Hono();
 
-	const { key, proxyUri, proxyToken } = config;
+	const { key, proxyUri, proxyToken, proxyTokenType = "Bearer" } = config;
 
 	// Validate required configuration
 	if (!proxyUri) {
@@ -72,19 +73,22 @@ function createApp(config) {
 		}
 
 		// Create proxy agent with undici
-		const proxyAgent = new ProxyAgent(proxyUri);
+		/** @type {import('undici').ProxyAgent.Options} */
+		const proxyAgentOptions = {
+			uri: proxyUri,
+		};
+
+		// Add proxy token if configured
+		if (proxyToken) {
+			proxyAgentOptions.token = `${proxyTokenType} ${proxyToken}`;
+		}
+
+		const proxyAgent = new ProxyAgent(proxyAgentOptions);
 
 		/** @type {Record<string, any>} */
 		const fetchOptions = {
 			dispatcher: proxyAgent,
 		};
-
-		// Add proxy token as Authorization header if configured
-		if (proxyToken) {
-			fetchOptions.headers = {
-				Authorization: `Bearer ${proxyToken}`,
-			};
-		}
 
 		// Fetch the URL
 		try {

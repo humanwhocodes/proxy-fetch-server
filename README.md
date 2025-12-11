@@ -34,6 +34,7 @@ The server is configured using environment variables:
 - **PROXY_FETCH_KEY** (optional) - The expected Bearer token in the Authorization header
 - **PORT** (optional) - The port to start the server on (default: 8080)
 - **PROXY_TOKEN** (optional) - The token that the proxy expects
+- **PROXY_TOKEN_TYPE** (optional) - The token type prefix for the proxy (default: "Bearer")
 
 Example:
 
@@ -42,6 +43,7 @@ PROXY_URI=http://proxy.example.com:8080 \
 PROXY_FETCH_KEY=my-secret-key \
 PORT=3000 \
 PROXY_TOKEN=proxy-secret \
+PROXY_TOKEN_TYPE=Bearer \
 npx @humanwhocodes/proxy-fetch-server
 ```
 
@@ -77,6 +79,7 @@ const app = createApp({
 	key: "my-secret-key",
 	proxyUri: "http://proxy.example.com:8080",
 	proxyToken: "proxy-secret",
+	proxyTokenType: "Bearer",
 });
 
 // Use with your preferred Node.js server adapter
