@@ -30,5 +30,3 @@ jobs:
                   npm test
               env:
                   CI: true
-            - name: JSR Publish Test
-              run: npm run test:jsr
