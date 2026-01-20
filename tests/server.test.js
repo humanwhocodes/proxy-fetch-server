@@ -27,8 +27,6 @@ describe("Proxy Fetch Server", () => {
 		// Create the app with test configuration
 		app = createApp({
 			key: "test-secret-key",
-			proxyUri: "http://proxy.example.com:8080",
-			proxyToken: "proxy-token",
 		});
 	});
 
@@ -358,10 +356,7 @@ describe("Proxy Fetch Server", () => {
 
 		beforeEach(() => {
 			// Create the app without a key
-			appNoAuth = createApp({
-				proxyUri: "http://proxy.example.com:8080",
-				proxyToken: "proxy-token",
-			});
+			appNoAuth = createApp({});
 		});
 
 		it("should allow requests without Authorization header when key is not configured", async () => {
@@ -415,95 +410,6 @@ describe("Proxy Fetch Server", () => {
 			expect(res.status).toBe(200);
 			expect(res.headers.get("Content-Type")).toContain("text/html");
 			expect(text).toBe("<html>Test content</html>");
-		});
-	});
-
-	describe("Proxy token configuration", () => {
-		it("should use default Bearer token type when proxyTokenType is not specified", async () => {
-			// Create app without specifying proxyTokenType
-			const appWithDefaultTokenType = createApp({
-				proxyUri: "http://proxy.example.com:8080",
-				proxyToken: "my-token",
-			});
-
-			// Mock the route
-			mockServer.get("/", {
-				status: 200,
-				headers: {
-					"Content-Type": "text/plain",
-				},
-				body: "success",
-			});
-
-			const req = new Request("http://localhost/", {
-				method: "POST",
-				headers: {
-					"Content-Type": "application/json",
-				},
-				body: JSON.stringify({ url: "https://example.com/" }),
-			});
-
-			const res = await appWithDefaultTokenType.fetch(req);
-
-			expect(res.status).toBe(200);
-		});
-
-		it("should use custom token type when proxyTokenType is specified", async () => {
-			// Create app with custom token type
-			const appWithCustomTokenType = createApp({
-				proxyUri: "http://proxy.example.com:8080",
-				proxyToken: "my-token",
-				proxyTokenType: "Basic",
-			});
-
-			// Mock the route
-			mockServer.get("/", {
-				status: 200,
-				headers: {
-					"Content-Type": "text/plain",
-				},
-				body: "success",
-			});
-
-			const req = new Request("http://localhost/", {
-				method: "POST",
-				headers: {
-					"Content-Type": "application/json",
-				},
-				body: JSON.stringify({ url: "https://example.com/" }),
-			});
-
-			const res = await appWithCustomTokenType.fetch(req);
-
-			expect(res.status).toBe(200);
-		});
-
-		it("should work without proxyToken when not configured", async () => {
-			// Create app without proxy token
-			const appWithoutToken = createApp({
-				proxyUri: "http://proxy.example.com:8080",
-			});
-
-			// Mock the route
-			mockServer.get("/", {
-				status: 200,
-				headers: {
-					"Content-Type": "text/plain",
-				},
-				body: "success",
-			});
-
-			const req = new Request("http://localhost/", {
-				method: "POST",
-				headers: {
-					"Content-Type": "application/json",
-				},
-				body: JSON.stringify({ url: "https://example.com/" }),
-			});
-
-			const res = await appWithoutToken.fetch(req);
-
-			expect(res.status).toBe(200);
 		});
 	});
 });

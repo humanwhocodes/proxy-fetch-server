@@ -7,26 +7,17 @@
 
 import { Hono } from "hono";
 import { bearerAuth } from "hono/bearer-auth";
-import { ProxyAgent } from "undici";
 
 /**
  * Creates the Hono app with the given configuration
  * @param {object} config - Configuration options
  * @param {string} [config.key] - Expected Bearer token (optional)
- * @param {string} config.proxyUri - Proxy URI (required)
- * @param {string} [config.proxyToken] - Proxy token
- * @param {string} [config.proxyTokenType] - Proxy token type prefix (default: "Bearer")
  * @returns {Hono} The configured Hono app
  */
 function createApp(config) {
 	const app = new Hono();
 
-	const { key, proxyUri, proxyToken, proxyTokenType = "Bearer" } = config;
-
-	// Validate required configuration
-	if (!proxyUri) {
-		throw new Error("proxyUri is required in configuration");
-	}
+	const { key } = config;
 
 	// Apply bearer auth middleware if key is provided
 	if (key) {
@@ -34,7 +25,7 @@ function createApp(config) {
 	}
 
 	/**
-	 * POST / endpoint - Fetches a URL using a proxy agent
+	 * POST / endpoint - Fetches a URL
 	 */
 	app.post("/", async (c) => {
 
@@ -72,27 +63,10 @@ function createApp(config) {
 			);
 		}
 
-		// Create proxy agent with undici
-		/** @type {import('undici').ProxyAgent.Options} */
-		const proxyAgentOptions = {
-			uri: proxyUri,
-		};
-
-		// Add proxy token if configured
-		if (proxyToken) {
-			proxyAgentOptions.token = `${proxyTokenType} ${proxyToken}`;
-		}
-
-		const proxyAgent = new ProxyAgent(proxyAgentOptions);
-
-		/** @type {Record<string, any>} */
-		const fetchOptions = {
-			dispatcher: proxyAgent,
-		};
-
-		// Fetch the URL
+		// Fetch the URL using Node.js built-in fetch
+		// Node.js automatically uses HTTP_PROXY, HTTPS_PROXY, and NO_PROXY environment variables
 		try {
-			const response = await fetch(body.url, fetchOptions);
+			const response = await fetch(body.url);
 
 			// Pass through the response using arrayBuffer for proper binary handling
 			const responseBody = await response.arrayBuffer();
