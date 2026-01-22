@@ -10,11 +10,11 @@ import { bearerAuth } from "hono/bearer-auth";
 
 /**
  * Creates the Hono app with the given configuration
- * @param {object} config - Configuration options
+ * @param {object} [config={}] - Configuration options
  * @param {string} [config.key] - Expected Bearer token (optional)
  * @returns {Hono} The configured Hono app
  */
-function createApp(config) {
+function createApp(config = {}) {
 	const app = new Hono();
 
 	const { key } = config;

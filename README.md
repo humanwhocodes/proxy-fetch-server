@@ -8,7 +8,7 @@ If you find this useful, please consider supporting my work with a [donation](ht
 
 A Node.js server that makes fetch requests through a proxy. Built with [Hono](https://hono.dev/), this server accepts POST requests with URLs to fetch. Proxy configuration is handled through standard Node.js environment variables.
 
-The intended use is as a serverless function.
+The intended use is inside of a Docker container.
 
 ## Installation
 
@@ -85,7 +85,6 @@ const app = createApp({
 });
 
 // Use with your preferred Node.js server adapter
-// Note: Proxy configuration is handled through HTTP_PROXY/HTTPS_PROXY environment variables
 ```
 
 ## License
