@@ -6,9 +6,9 @@ If you find this useful, please consider supporting my work with a [donation](ht
 
 ## Description
 
-A Node.js server that uses a proxy agent to make fetch requests. Built with [Hono](https://hono.dev/), this server accepts POST requests with URLs to fetch through a configurable proxy.
+A Node.js server that makes fetch requests through a proxy. Built with [Hono](https://hono.dev/), this server accepts POST requests with URLs to fetch. Proxy configuration is handled through standard Node.js environment variables.
 
-The intended use is as a serverless function.
+The intended use is inside of a Docker container.
 
 ## Installation
 
@@ -30,20 +30,25 @@ npx @humanwhocodes/proxy-fetch-server
 
 The server is configured using environment variables:
 
-- **PROXY_URI** (required) - The address of the proxy to use with the proxy agent
 - **PROXY_FETCH_KEY** (optional) - The expected Bearer token in the Authorization header
 - **PORT** (optional) - The port to start the server on (default: 8080)
-- **PROXY_TOKEN** (optional) - The token that the proxy expects
-- **PROXY_TOKEN_TYPE** (optional) - The token type prefix for the proxy (default: "Bearer")
+
+#### Proxy Configuration
+
+The server uses Node.js's built-in proxy support through standard environment variables:
+
+- **HTTP_PROXY** - Proxy URL for HTTP requests
+- **HTTPS_PROXY** - Proxy URL for HTTPS requests
+- **NO_PROXY** - Comma-separated list of hosts that should bypass the proxy
 
 Example:
 
 ```shell
-PROXY_URI=http://proxy.example.com:8080 \
+HTTP_PROXY=http://proxy.example.com:8080 \
+HTTPS_PROXY=http://proxy.example.com:8080 \
+NO_PROXY=localhost,127.0.0.1 \
 PROXY_FETCH_KEY=my-secret-key \
 PORT=3000 \
-PROXY_TOKEN=proxy-secret \
-PROXY_TOKEN_TYPE=Bearer \
 npx @humanwhocodes/proxy-fetch-server
 ```
 
@@ -65,7 +70,7 @@ curl -X POST http://localhost:8080/ \
 
 The server will:
 1. Validate the Bearer token (if configured)
-2. Fetch the specified URL through the configured proxy
+2. Fetch the specified URL (using the configured proxy if HTTP_PROXY/HTTPS_PROXY are set)
 3. Return the response with the same status code and content type
 
 ### Programmatic Usage
@@ -77,9 +82,6 @@ import { createApp } from "@humanwhocodes/proxy-fetch-server";
 
 const app = createApp({
 	key: "my-secret-key",
-	proxyUri: "http://proxy.example.com:8080",
-	proxyToken: "proxy-secret",
-	proxyTokenType: "Bearer",
 });
 
 // Use with your preferred Node.js server adapter
