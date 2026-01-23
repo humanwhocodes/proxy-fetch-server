@@ -30,16 +30,22 @@ npx @humanwhocodes/proxy-fetch-server
 
 The server is configured using environment variables:
 
-- **PROXY_URI** (required) - The address of the proxy to use with the proxy agent
+- **http_proxy** (conditionally required) - The proxy server to use for requests that use the http protocol
+- **https_proxy** (conditionally required) - The proxy server to use for requests that use the https protocol
+- **no_proxy** (optional) - A comma-delimited list of hostnames or hostname:port entries that should bypass using the configured proxy completely. If a hostname begins with a dot (.) then it applies to all subdomains. For instance `.humanwhocodes.com` applies to `humanwhocodes.com`, `www.humanwhocodes.com`, `newsletter.humanwhocodes.com`, etc.
 - **PROXY_FETCH_KEY** (optional) - The expected Bearer token in the Authorization header
 - **PORT** (optional) - The port to start the server on (default: 8080)
 - **PROXY_TOKEN** (optional) - The token that the proxy expects
 - **PROXY_TOKEN_TYPE** (optional) - The token type prefix for the proxy (default: "Bearer")
 
+Either `http_proxy` or `https_proxy` is required.
+
 Example:
 
 ```shell
-PROXY_URI=http://proxy.example.com:8080 \
+http_proxy=http://proxy.example.com:8080 \
+https_proxy=http://proxy.example.com:8080 \
+no_proxy=localhost,.internal.com \
 PROXY_FETCH_KEY=my-secret-key \
 PORT=3000 \
 PROXY_TOKEN=proxy-secret \
@@ -77,13 +83,26 @@ import { createApp } from "@humanwhocodes/proxy-fetch-server";
 
 const app = createApp({
 	key: "my-secret-key",
-	proxyUri: "http://proxy.example.com:8080",
+	httpProxy: "http://proxy.example.com:8080",
+	httpsProxy: "http://proxy.example.com:8080",
+	noProxy: ["localhost", ".internal.com"],
 	proxyToken: "proxy-secret",
 	proxyTokenType: "Bearer",
 });
 
 // Use with your preferred Node.js server adapter
 ```
+
+**Configuration options:**
+
+- `key` (string, optional) - The expected Bearer token in the Authorization header
+- `httpProxy` (string, conditionally required) - The proxy server to use for HTTP requests
+- `httpsProxy` (string, conditionally required) - The proxy server to use for HTTPS requests
+- `noProxy` (string[], optional) - Array of hostnames or hostname:port entries to bypass proxy
+- `proxyToken` (string, optional) - The token that the proxy expects
+- `proxyTokenType` (string, optional) - The token type prefix for the proxy (default: "Bearer")
+
+Either `httpProxy` or `httpsProxy` is required.
 
 ## License
 
