@@ -70,6 +70,7 @@ curl -X POST http://localhost:8080/ \
 ```
 
 The server will:
+
 1. Validate the Bearer token (if configured)
 2. Fetch the specified URL through the configured proxy
 3. Return the response with the same status code and content type

@@ -22,7 +22,7 @@ const proxyTokenType = process.env.PROXY_TOKEN_TYPE;
 
 // Parse no_proxy into an array
 const noProxy = noProxyEnv
-	? noProxyEnv.split(",").map((entry) => entry.trim())
+	? noProxyEnv.split(",").map(entry => entry.trim())
 	: [];
 
 // Validate required configuration
@@ -47,4 +47,3 @@ serve({
 	fetch: app.fetch,
 	port,
 });
-

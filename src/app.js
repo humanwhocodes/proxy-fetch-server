@@ -81,8 +81,7 @@ function createApp(config) {
 	/**
 	 * POST / endpoint - Fetches a URL using a proxy agent
 	 */
-	app.post("/", async (c) => {
-
+	app.post("/", async c => {
 		// Parse request body
 		/** @type {any} */
 		let body;
@@ -155,7 +154,8 @@ function createApp(config) {
 			// Pass through the response using arrayBuffer for proper binary handling
 			const responseBody = await response.arrayBuffer();
 			const contentType =
-				response.headers.get("Content-Type") || "application/octet-stream";
+				response.headers.get("Content-Type") ||
+				"application/octet-stream";
 
 			return new Response(responseBody, {
 				status: response.status,
