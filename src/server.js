@@ -14,8 +14,19 @@ import { createApp } from "./app.js";
 // Get configuration from environment variables
 const key = process.env.PROXY_FETCH_KEY;
 const port = parseInt(process.env.PORT || "8080", 10);
+const proxyUri = process.env.PROXY_URI;
+const proxyToken = process.env.PROXY_TOKEN;
+const proxyTokenType = process.env.PROXY_TOKEN_TYPE;
 
-const app = createApp({ key });
+// Validate required configuration
+if (!proxyUri) {
+	console.error(
+		"Error: PROXY_URI environment variable is required",
+	);
+	process.exit(1);
+}
+
+const app = createApp({ key, proxyUri, proxyToken, proxyTokenType });
 
 console.log(`Starting server on port ${port}...`);
 serve({
