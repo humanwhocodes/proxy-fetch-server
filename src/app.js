@@ -53,20 +53,22 @@ function createApp(config) {
 	 */
 	function shouldBypassProxy(hostname, port, noProxyList) {
 		for (const entry of noProxyList) {
-			// Check for hostname:port match
-			if (entry.includes(":")) {
-				const hostnamePort = port ? `${hostname}:${port}` : hostname;
-
-				if (entry === hostnamePort) {
-					return true;
-				}
-			}
-
 			// Check for subdomain pattern (starts with .)
 			if (entry.startsWith(".")) {
 				const domain = entry.slice(1); // Remove leading dot
 
 				if (hostname === domain || hostname.endsWith(`.${domain}`)) {
+					return true;
+				}
+
+				continue;
+			}
+
+			// Check for hostname:port match
+			if (entry.includes(":")) {
+				const hostnamePort = port ? `${hostname}:${port}` : hostname;
+
+				if (entry === hostnamePort) {
 					return true;
 				}
 			} else if (entry === hostname) {

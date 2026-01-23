@@ -575,8 +575,15 @@ describe("Proxy Fetch Server", () => {
 				httpsProxy: "http://https-proxy.example.com:8080",
 			});
 
-			// Mock the route
-			mockServer.get("/", {
+			// Create a mock server for HTTP URLs
+			const httpMockServer = new MockServer("http://example.com");
+			fetchMocker.mockGlobal();
+			fetchMocker = new FetchMocker({
+				servers: [httpMockServer],
+			});
+			fetchMocker.mockGlobal();
+
+			httpMockServer.get("/", {
 				status: 200,
 				headers: {
 					"Content-Type": "text/plain",
@@ -589,7 +596,7 @@ describe("Proxy Fetch Server", () => {
 				headers: {
 					"Content-Type": "application/json",
 				},
-				body: JSON.stringify({ url: "https://example.com/" }),
+				body: JSON.stringify({ url: "http://example.com/" }),
 			});
 
 			const res = await appWithBoth.fetch(req);
