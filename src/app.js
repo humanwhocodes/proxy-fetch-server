@@ -132,7 +132,13 @@ function createApp(config) {
 				targetUrl.protocol === "https:" ? httpsProxy : httpProxy;
 
 			// If the selected proxy is not configured, fall back to the other one
+			// At least one of httpProxy or httpsProxy is guaranteed to be defined
 			const proxyUri = selectedProxy || httpsProxy || httpProxy;
+
+			if (!proxyUri) {
+				// This should never happen due to validation, but satisfy TypeScript
+				throw new Error("No proxy URI available");
+			}
 
 			// Create proxy agent with undici
 			/** @type {import('undici').ProxyAgent.Options} */
