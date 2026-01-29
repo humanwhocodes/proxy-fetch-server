@@ -6,7 +6,6 @@
 ### ⚠ BREAKING CHANGES
 
 * Replace PROXY_URI with http_proxy, https_proxy, and no_proxy environment variables ([#12](https://github.com/humanwhocodes/proxy-fetch-server/issues/12))
-* Switch to use HTTP_PROXY, HTTPS_PROXY, NO_PROXY ([#9](https://github.com/humanwhocodes/proxy-fetch-server/issues/9))
 
 ### Features
 
