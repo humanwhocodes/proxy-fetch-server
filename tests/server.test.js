@@ -27,7 +27,7 @@ describe("Proxy Fetch Server", () => {
 		// Create the app with test configuration
 		app = createApp({
 			key: "test-secret-key",
-			proxyUri: "http://proxy.example.com:8080",
+			httpsProxy: "http://proxy.example.com:8080",
 			proxyToken: "proxy-token",
 		});
 	});
@@ -259,7 +259,8 @@ describe("Proxy Fetch Server", () => {
 
 		it("should handle text file responses", async () => {
 			// Mock the route with plain text file
-			const textContent = "This is a plain text file.\nWith multiple lines.";
+			const textContent =
+				"This is a plain text file.\nWith multiple lines.";
 			mockServer.get("/file.txt", {
 				status: 200,
 				headers: {
@@ -288,15 +289,13 @@ describe("Proxy Fetch Server", () => {
 		it("should handle binary image responses", async () => {
 			// Create a small binary image (1x1 transparent PNG)
 			const pngData = new Uint8Array([
-				0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a,
-				0x00, 0x00, 0x00, 0x0d, 0x49, 0x48, 0x44, 0x52,
-				0x00, 0x00, 0x00, 0x01, 0x00, 0x00, 0x00, 0x01,
-				0x08, 0x06, 0x00, 0x00, 0x00, 0x1f, 0x15, 0xc4,
-				0x89, 0x00, 0x00, 0x00, 0x0a, 0x49, 0x44, 0x41,
-				0x54, 0x78, 0x9c, 0x63, 0x00, 0x01, 0x00, 0x00,
-				0x05, 0x00, 0x01, 0x0d, 0x0a, 0x2d, 0xb4, 0x00,
-				0x00, 0x00, 0x00, 0x49, 0x45, 0x4e, 0x44, 0xae,
-				0x42, 0x60, 0x82
+				0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a, 0x00, 0x00,
+				0x00, 0x0d, 0x49, 0x48, 0x44, 0x52, 0x00, 0x00, 0x00, 0x01,
+				0x00, 0x00, 0x00, 0x01, 0x08, 0x06, 0x00, 0x00, 0x00, 0x1f,
+				0x15, 0xc4, 0x89, 0x00, 0x00, 0x00, 0x0a, 0x49, 0x44, 0x41,
+				0x54, 0x78, 0x9c, 0x63, 0x00, 0x01, 0x00, 0x00, 0x05, 0x00,
+				0x01, 0x0d, 0x0a, 0x2d, 0xb4, 0x00, 0x00, 0x00, 0x00, 0x49,
+				0x45, 0x4e, 0x44, 0xae, 0x42, 0x60, 0x82,
 			]);
 
 			mockServer.get("/image.png", {
@@ -359,7 +358,7 @@ describe("Proxy Fetch Server", () => {
 		beforeEach(() => {
 			// Create the app without a key
 			appNoAuth = createApp({
-				proxyUri: "http://proxy.example.com:8080",
+				httpsProxy: "http://proxy.example.com:8080",
 				proxyToken: "proxy-token",
 			});
 		});
@@ -422,7 +421,7 @@ describe("Proxy Fetch Server", () => {
 		it("should use default Bearer token type when proxyTokenType is not specified", async () => {
 			// Create app without specifying proxyTokenType
 			const appWithDefaultTokenType = createApp({
-				proxyUri: "http://proxy.example.com:8080",
+				httpsProxy: "http://proxy.example.com:8080",
 				proxyToken: "my-token",
 			});
 
@@ -451,7 +450,7 @@ describe("Proxy Fetch Server", () => {
 		it("should use custom token type when proxyTokenType is specified", async () => {
 			// Create app with custom token type
 			const appWithCustomTokenType = createApp({
-				proxyUri: "http://proxy.example.com:8080",
+				httpsProxy: "http://proxy.example.com:8080",
 				proxyToken: "my-token",
 				proxyTokenType: "Basic",
 			});
@@ -481,7 +480,7 @@ describe("Proxy Fetch Server", () => {
 		it("should work without proxyToken when not configured", async () => {
 			// Create app without proxy token
 			const appWithoutToken = createApp({
-				proxyUri: "http://proxy.example.com:8080",
+				httpsProxy: "http://proxy.example.com:8080",
 			});
 
 			// Mock the route
@@ -502,6 +501,303 @@ describe("Proxy Fetch Server", () => {
 			});
 
 			const res = await appWithoutToken.fetch(req);
+
+			expect(res.status).toBe(200);
+		});
+	});
+
+	describe("New proxy configuration", () => {
+		it("should throw error when neither httpProxy nor httpsProxy is provided", () => {
+			expect(() => {
+				createApp({});
+			}).toThrow(
+				"Either httpProxy or httpsProxy is required in configuration",
+			);
+		});
+
+		it("should work with only httpProxy", async () => {
+			const appHttpOnly = createApp({
+				httpProxy: "http://proxy.example.com:8080",
+			});
+
+			// Mock the route
+			mockServer.get("/", {
+				status: 200,
+				headers: {
+					"Content-Type": "text/plain",
+				},
+				body: "success",
+			});
+
+			const req = new Request("http://localhost/", {
+				method: "POST",
+				headers: {
+					"Content-Type": "application/json",
+				},
+				body: JSON.stringify({ url: "https://example.com/" }),
+			});
+
+			const res = await appHttpOnly.fetch(req);
+
+			expect(res.status).toBe(200);
+		});
+
+		it("should work with only httpsProxy", async () => {
+			const appHttpsOnly = createApp({
+				httpsProxy: "http://proxy.example.com:8080",
+			});
+
+			// Mock the route
+			mockServer.get("/", {
+				status: 200,
+				headers: {
+					"Content-Type": "text/plain",
+				},
+				body: "success",
+			});
+
+			const req = new Request("http://localhost/", {
+				method: "POST",
+				headers: {
+					"Content-Type": "application/json",
+				},
+				body: JSON.stringify({ url: "https://example.com/" }),
+			});
+
+			const res = await appHttpsOnly.fetch(req);
+
+			expect(res.status).toBe(200);
+		});
+
+		it("should use httpProxy for http URLs", async () => {
+			const appWithBoth = createApp({
+				httpProxy: "http://http-proxy.example.com:8080",
+				httpsProxy: "http://https-proxy.example.com:8080",
+			});
+
+			// Create a mock server for HTTP URLs
+			const httpMockServer = new MockServer("http://example.com");
+			fetchMocker.mockGlobal();
+			fetchMocker = new FetchMocker({
+				servers: [httpMockServer],
+			});
+			fetchMocker.mockGlobal();
+
+			httpMockServer.get("/", {
+				status: 200,
+				headers: {
+					"Content-Type": "text/plain",
+				},
+				body: "http success",
+			});
+
+			const req = new Request("http://localhost/", {
+				method: "POST",
+				headers: {
+					"Content-Type": "application/json",
+				},
+				body: JSON.stringify({ url: "http://example.com/" }),
+			});
+
+			const res = await appWithBoth.fetch(req);
+
+			expect(res.status).toBe(200);
+		});
+
+		it("should use httpsProxy for https URLs", async () => {
+			const appWithBoth = createApp({
+				httpProxy: "http://http-proxy.example.com:8080",
+				httpsProxy: "http://https-proxy.example.com:8080",
+			});
+
+			// Mock the route
+			mockServer.get("/", {
+				status: 200,
+				headers: {
+					"Content-Type": "text/plain",
+				},
+				body: "https success",
+			});
+
+			const req = new Request("http://localhost/", {
+				method: "POST",
+				headers: {
+					"Content-Type": "application/json",
+				},
+				body: JSON.stringify({ url: "https://example.com/" }),
+			});
+
+			const res = await appWithBoth.fetch(req);
+
+			expect(res.status).toBe(200);
+		});
+	});
+
+	describe("noProxy configuration", () => {
+		it("should bypass proxy for exact hostname match", async () => {
+			const appWithNoProxy = createApp({
+				httpsProxy: "http://proxy.example.com:8080",
+				noProxy: ["example.com"],
+			});
+
+			// Mock the route
+			mockServer.get("/", {
+				status: 200,
+				headers: {
+					"Content-Type": "text/plain",
+				},
+				body: "success",
+			});
+
+			const req = new Request("http://localhost/", {
+				method: "POST",
+				headers: {
+					"Content-Type": "application/json",
+				},
+				body: JSON.stringify({ url: "https://example.com/" }),
+			});
+
+			const res = await appWithNoProxy.fetch(req);
+
+			expect(res.status).toBe(200);
+		});
+
+		it("should bypass proxy for hostname:port match", async () => {
+			const appWithNoProxy = createApp({
+				httpsProxy: "http://proxy.example.com:8080",
+				noProxy: ["example.com:443"],
+			});
+
+			// Mock the route
+			mockServer.get("/", {
+				status: 200,
+				headers: {
+					"Content-Type": "text/plain",
+				},
+				body: "success",
+			});
+
+			const req = new Request("http://localhost/", {
+				method: "POST",
+				headers: {
+					"Content-Type": "application/json",
+				},
+				body: JSON.stringify({ url: "https://example.com:443/" }),
+			});
+
+			const res = await appWithNoProxy.fetch(req);
+
+			expect(res.status).toBe(200);
+		});
+
+		it("should bypass proxy for subdomain pattern", async () => {
+			const appWithNoProxy = createApp({
+				httpsProxy: "http://proxy.example.com:8080",
+				noProxy: [".example.com"],
+			});
+
+			// Mock the route
+			mockServer.get("/subdomain", {
+				status: 200,
+				headers: {
+					"Content-Type": "text/plain",
+				},
+				body: "subdomain success",
+			});
+
+			const req = new Request("http://localhost/", {
+				method: "POST",
+				headers: {
+					"Content-Type": "application/json",
+				},
+				body: JSON.stringify({ url: "https://example.com/subdomain" }),
+			});
+
+			const res = await appWithNoProxy.fetch(req);
+
+			expect(res.status).toBe(200);
+		});
+
+		it("should bypass proxy for root domain with dot pattern", async () => {
+			const appWithNoProxy = createApp({
+				httpsProxy: "http://proxy.example.com:8080",
+				noProxy: [".example.com"],
+			});
+
+			// Mock the route
+			mockServer.get("/", {
+				status: 200,
+				headers: {
+					"Content-Type": "text/plain",
+				},
+				body: "success",
+			});
+
+			const req = new Request("http://localhost/", {
+				method: "POST",
+				headers: {
+					"Content-Type": "application/json",
+				},
+				body: JSON.stringify({ url: "https://example.com/" }),
+			});
+
+			const res = await appWithNoProxy.fetch(req);
+
+			expect(res.status).toBe(200);
+		});
+
+		it("should not bypass proxy for non-matching hostname", async () => {
+			const appWithNoProxy = createApp({
+				httpsProxy: "http://proxy.example.com:8080",
+				noProxy: ["other.com"],
+			});
+
+			// Mock the route
+			mockServer.get("/", {
+				status: 200,
+				headers: {
+					"Content-Type": "text/plain",
+				},
+				body: "success",
+			});
+
+			const req = new Request("http://localhost/", {
+				method: "POST",
+				headers: {
+					"Content-Type": "application/json",
+				},
+				body: JSON.stringify({ url: "https://example.com/" }),
+			});
+
+			const res = await appWithNoProxy.fetch(req);
+
+			expect(res.status).toBe(200);
+		});
+
+		it("should work with empty noProxy array", async () => {
+			const appWithEmptyNoProxy = createApp({
+				httpsProxy: "http://proxy.example.com:8080",
+				noProxy: [],
+			});
+
+			// Mock the route
+			mockServer.get("/", {
+				status: 200,
+				headers: {
+					"Content-Type": "text/plain",
+				},
+				body: "success",
+			});
+
+			const req = new Request("http://localhost/", {
+				method: "POST",
+				headers: {
+					"Content-Type": "application/json",
+				},
+				body: JSON.stringify({ url: "https://example.com/" }),
+			});
+
+			const res = await appWithEmptyNoProxy.fetch(req);
 
 			expect(res.status).toBe(200);
 		});

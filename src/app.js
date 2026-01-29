@@ -13,7 +13,9 @@ import { ProxyAgent } from "undici";
  * Creates the Hono app with the given configuration
  * @param {object} config - Configuration options
  * @param {string} [config.key] - Expected Bearer token (optional)
- * @param {string} config.proxyUri - Proxy URI (required)
+ * @param {string} [config.httpProxy] - HTTP proxy URI
+ * @param {string} [config.httpsProxy] - HTTPS proxy URI
+ * @param {string[]} [config.noProxy] - Array of hostnames or hostname:port to bypass proxy
  * @param {string} [config.proxyToken] - Proxy token
  * @param {string} [config.proxyTokenType] - Proxy token type prefix (default: "Bearer")
  * @returns {Hono} The configured Hono app
@@ -21,11 +23,20 @@ import { ProxyAgent } from "undici";
 function createApp(config) {
 	const app = new Hono();
 
-	const { key, proxyUri, proxyToken, proxyTokenType = "Bearer" } = config;
+	const {
+		key,
+		httpProxy,
+		httpsProxy,
+		noProxy = [],
+		proxyToken,
+		proxyTokenType = "Bearer",
+	} = config;
 
 	// Validate required configuration
-	if (!proxyUri) {
-		throw new Error("proxyUri is required in configuration");
+	if (!httpProxy && !httpsProxy) {
+		throw new Error(
+			"Either httpProxy or httpsProxy is required in configuration",
+		);
 	}
 
 	// Apply bearer auth middleware if key is provided
@@ -34,10 +45,45 @@ function createApp(config) {
 	}
 
 	/**
+	 * Checks if a hostname should bypass the proxy
+	 * @param {string} hostname - The hostname to check
+	 * @param {string} port - The port (optional)
+	 * @param {string[]} noProxyList - Array of hostnames or hostname:port to bypass
+	 * @returns {boolean} True if should bypass proxy
+	 */
+	function shouldBypassProxy(hostname, port, noProxyList) {
+		for (const entry of noProxyList) {
+			// Check for subdomain pattern (starts with .)
+			if (entry.startsWith(".")) {
+				const domain = entry.slice(1); // Remove leading dot
+
+				if (hostname === domain || hostname.endsWith(`.${domain}`)) {
+					return true;
+				}
+
+				continue;
+			}
+
+			// Check for hostname:port match
+			if (entry.includes(":")) {
+				const hostnamePort = port ? `${hostname}:${port}` : hostname;
+
+				if (entry === hostnamePort) {
+					return true;
+				}
+			} else if (entry === hostname) {
+				// Exact hostname match
+				return true;
+			}
+		}
+
+		return false;
+	}
+
+	/**
 	 * POST / endpoint - Fetches a URL using a proxy agent
 	 */
-	app.post("/", async (c) => {
-
+	app.post("/", async c => {
 		// Parse request body
 		/** @type {any} */
 		let body;
@@ -72,23 +118,42 @@ function createApp(config) {
 			);
 		}
 
-		// Create proxy agent with undici
-		/** @type {import('undici').ProxyAgent.Options} */
-		const proxyAgentOptions = {
-			uri: proxyUri,
-		};
-
-		// Add proxy token if configured
-		if (proxyToken) {
-			proxyAgentOptions.token = `${proxyTokenType} ${proxyToken}`;
-		}
-
-		const proxyAgent = new ProxyAgent(proxyAgentOptions);
+		// Check if we should bypass the proxy
+		const hostname = targetUrl.hostname;
+		const port = targetUrl.port;
+		const useProxy = !shouldBypassProxy(hostname, port, noProxy);
 
 		/** @type {Record<string, any>} */
-		const fetchOptions = {
-			dispatcher: proxyAgent,
-		};
+		const fetchOptions = {};
+
+		if (useProxy) {
+			// Determine which proxy to use based on the protocol
+			const selectedProxy =
+				targetUrl.protocol === "https:" ? httpsProxy : httpProxy;
+
+			// If the selected proxy is not configured, fall back to the other one
+			// At least one of httpProxy or httpsProxy is guaranteed to be defined
+			const proxyUri = selectedProxy || httpsProxy || httpProxy;
+
+			if (!proxyUri) {
+				// This should never happen due to validation, but satisfy TypeScript
+				throw new Error("No proxy URI available");
+			}
+
+			// Create proxy agent with undici
+			/** @type {import('undici').ProxyAgent.Options} */
+			const proxyAgentOptions = {
+				uri: proxyUri,
+			};
+
+			// Add proxy token if configured
+			if (proxyToken) {
+				proxyAgentOptions.token = `${proxyTokenType} ${proxyToken}`;
+			}
+
+			const proxyAgent = new ProxyAgent(proxyAgentOptions);
+			fetchOptions.dispatcher = proxyAgent;
+		}
 
 		// Fetch the URL
 		try {
@@ -97,7 +162,8 @@ function createApp(config) {
 			// Pass through the response using arrayBuffer for proper binary handling
 			const responseBody = await response.arrayBuffer();
 			const contentType =
-				response.headers.get("Content-Type") || "application/octet-stream";
+				response.headers.get("Content-Type") ||
+				"application/octet-stream";
 
 			return new Response(responseBody, {
 				status: response.status,
