@@ -14,7 +14,7 @@ Use double quotes for strings. Example:
 
 ```typescript
 // Incorrect
-const message = "Hello, world!";
+const message = 'Hello, world!';
 
 // Correct
 const message = "Hello, world!";
