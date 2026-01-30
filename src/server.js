@@ -14,7 +14,7 @@ import { createApp } from "./app.js";
 // Get configuration from environment variables
 const key = process.env.PROXY_FETCH_KEY;
 const port = parseInt(process.env.PORT || "8080", 10);
-const fetchProxyUri = process.env.FETCH_PROXY_URI;
+const fetchProxyUri = process.env.FETCH_PROXY;
 const httpProxy = fetchProxyUri || process.env.http_proxy;
 const httpsProxy = fetchProxyUri || process.env.https_proxy;
 const noProxyEnv = process.env.no_proxy;
@@ -29,7 +29,7 @@ const noProxy = noProxyEnv
 // Validate required configuration
 if (!httpProxy && !httpsProxy) {
 	console.error(
-		"Error: Either FETCH_PROXY_URI, http_proxy, or https_proxy environment variable is required",
+		"Error: Either FETCH_PROXY, http_proxy, or https_proxy environment variable is required",
 	);
 	process.exit(1);
 }

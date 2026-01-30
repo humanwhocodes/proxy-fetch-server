@@ -30,7 +30,7 @@ npx @humanwhocodes/proxy-fetch-server
 
 The server is configured using environment variables:
 
-- **FETCH_PROXY_URI** (conditionally required) - A universal proxy URI that will be used for both HTTP and HTTPS requests. When set, this supersedes both `http_proxy` and `https_proxy`, allowing you to configure the proxy just for the fetch request rather than the whole process.
+- **FETCH_PROXY** (conditionally required) - A universal proxy URI that will be used for both HTTP and HTTPS requests. When set, this supersedes both `http_proxy` and `https_proxy`, allowing you to configure the proxy just for the fetch request rather than the whole process.
 - **http_proxy** (conditionally required) - The proxy server to use for requests that use the http protocol
 - **https_proxy** (conditionally required) - The proxy server to use for requests that use the https protocol
 - **no_proxy** (optional) - A comma-delimited list of hostnames or hostname:port entries that should bypass using the configured proxy completely. If a hostname begins with a dot (.) then it applies to all subdomains. For instance `.humanwhocodes.com` applies to `humanwhocodes.com`, `www.humanwhocodes.com`, `newsletter.humanwhocodes.com`, etc.
@@ -39,7 +39,7 @@ The server is configured using environment variables:
 - **PROXY_TOKEN** (optional) - The token that the proxy expects
 - **PROXY_TOKEN_TYPE** (optional) - The token type prefix for the proxy (default: "Bearer")
 
-Either `FETCH_PROXY_URI` or at least one of `http_proxy` and `https_proxy` is required.
+Either `FETCH_PROXY` or at least one of `http_proxy` and `https_proxy` is required.
 
 Example:
 
@@ -54,10 +54,10 @@ PROXY_TOKEN_TYPE=Bearer \
 npx @humanwhocodes/proxy-fetch-server
 ```
 
-Or, using `FETCH_PROXY_URI` to set both HTTP and HTTPS proxy to the same value:
+Or, using `FETCH_PROXY` to set both HTTP and HTTPS proxy to the same value:
 
 ```shell
-FETCH_PROXY_URI=http://proxy.example.com:8080 \
+FETCH_PROXY=http://proxy.example.com:8080 \
 no_proxy=localhost,.internal.com \
 PROXY_FETCH_KEY=my-secret-key \
 PORT=3000 \
