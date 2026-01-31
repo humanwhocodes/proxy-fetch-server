@@ -34,3 +34,7 @@ This project is a Node.js library .
 - Run `npx mocha <filename>` to execute tests for specific files; always do this until all tests pass for this file.
 - Run `npm test` to run all tests
 - Do not change the working directory when running tests
+
+## Pull Requests
+
+- Pull request titles must use Conventional Commits.
